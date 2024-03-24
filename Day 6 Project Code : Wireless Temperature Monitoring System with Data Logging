@@ -50,5 +50,5 @@ void loop() {
   bluetooth.println(temperature);
   Serial.println("Temperature data sent via Bluetooth.");
 
-  delay(5000);  // Delay for 5 seconds before taking the next reading
+  delay(5000);  
 }
