@@ -1,0 +1,32 @@
+#include <DHT.h>
+#include <Wire.h>
+#include <SoftwareSerial.h>
+
+#define DHTPIN 2          // Digital pin connected to the DHT sensor
+#define DHTTYPE DHT11     // DHT sensor type 
+#define TX_PIN 3          // Pin connected to HC-05 Bluetooth module TX
+#define RX_PIN 4          // Pin connected to HC-05 Bluetooth module RX
+
+DHT dht(DHTPIN, DHTTYPE);
+SoftwareSerial bluetoothSerial(RX_PIN, TX_PIN);  // Create a SoftwareSerial object for Bluetooth communication
+
+void setup() {
+  Serial.begin(9600);              
+  bluetoothSerial.begin(9600);      // Start Bluetooth communication
+  dht.begin();                      // Initialize DHT sensor
+}
+
+void loop() {
+  float temperature = dht.readTemperature();    // Read temperature from DHT sensor
+  float humidity = dht.readHumidity();          // Read humidity from DHT sensor
+  
+  // Send temperature and humidity data over Bluetooth
+  bluetoothSerial.print("Temperature: ");
+  bluetoothSerial.print(temperature);
+  bluetoothSerial.println(" C");
+  bluetoothSerial.print("Humidity: ");
+  bluetoothSerial.print(humidity);
+  bluetoothSerial.println(" %");
+
+  delay(5000); 
+}
