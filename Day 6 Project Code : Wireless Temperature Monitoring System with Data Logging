@@ -1,0 +1,54 @@
+#include <SPI.h>
+#include <SD.h>
+#include <DHT.h>
+#include <SoftwareSerial.h>
+
+#define DHTPIN 2          // Digital pin connected to the DHT sensor
+#define DHTTYPE DHT11     // DHT sensor type 
+
+DHT dht(DHTPIN, DHTTYPE);
+
+File dataFile;           // File object for data logging
+SoftwareSerial bluetooth(10, 11);  // RX, TX pins for Bluetooth module
+
+void setup() {
+  Serial.begin(9600);   
+  dht.begin();          // Initialize DHT sensor
+
+  // Initialize SD card
+  if (!SD.begin(4)) {
+    Serial.println("SD card initialization failed!");
+    return;
+  }
+  Serial.println("SD card initialized.");
+
+  // Initialize Bluetooth module
+  bluetooth.begin(9600);
+  Serial.println("Bluetooth module initialized.");
+}
+
+void loop() {
+  // Reading temperature data
+  float temperature = dht.readTemperature();
+  if (isnan(temperature)) {
+    Serial.println("Failed to read temperature from DHT sensor!");
+    return;
+  }
+
+  // Logging temperature data to SD card
+  dataFile = SD.open("temperature.txt", FILE_WRITE);
+  if (dataFile) {
+    dataFile.println(temperature);
+    dataFile.close();
+    Serial.println("Temperature data logged to SD card.");
+  } else {
+    Serial.println("Error opening temperature.txt for writing!");
+  }
+
+  // Sending temperature data via Bluetooth
+  bluetooth.print("Temperature: ");
+  bluetooth.println(temperature);
+  Serial.println("Temperature data sent via Bluetooth.");
+
+  delay(5000);  // Delay for 5 seconds before taking the next reading
+}
