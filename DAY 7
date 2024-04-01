@@ -1,50 +1,40 @@
-// Include necessary libraries
 #include <Wire.h>
-#include <LiquidCrystal.h>
+#include <LiquidCrystal_I2C.h>
 #include <DHT.h>
 
-// Define sensor pins
-#define dhtPin A0
-#define trigPin 7
-#define echoPin 6
-#define ldrPin A1
+// Define the pins for the sensors
+const int trigPin = 12;
+const int echoPin = 13;
+const int dhtPin = 11;
+const int ldrPin = A0;
 
-// Define LCD pins
-#define lcd_rs 12
-#define lcd_en 11
-#define lcd_d4 5
-#define lcd_d5 4
-#define lcd_d6 3
-#define lcd_d7 2
+// Define the LCD parameters
+const int lcdAddress = 0x27; // LCD I2C address
+const int lcdCols = 16;      // Number of columns
+const int lcdRows = 2;       // Number of rows
 
-// Initialize LCD display
-LiquidCrystal lcd(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7);
+// Initialize the DHT sensor
+DHT dht(dhtPin, DHT11);
 
-// Initialize DHT sensor
-#define DHTTYPE DHT11
-DHT dht(dhtPin, DHTTYPE);
+// Create an instance of the LiquidCrystal_I2C class
+LiquidCrystal_I2C lcd(lcdAddress, lcdCols, lcdRows);
 
 void setup() {
-  // Set up serial communication
+  // Initialize serial communication
   Serial.begin(9600);
 
-  // Set up LCD display
-  lcd.begin(16, 2); // Initialize LCD with 16 columns and 2 rows
+  // Initialize the LCD
+  lcd.init();
 
-  // Set up ultrasonic sensor pins
+  // Turn on the backlight
+  lcd.backlight();
+
+  // Set up the ultrasonic sensor
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT);
 
-  // Start DHT sensor
+  // Start the DHT sensor
   dht.begin();
-
-  // Print startup message
-  lcd.setCursor(0, 0);
-  lcd.print("Environment");
-  lcd.setCursor(0, 1);
-  lcd.print("Monitoring");
-  delay(2000);
-  lcd.clear();
 }
 
 void loop() {
@@ -56,34 +46,44 @@ void loop() {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
-  distance = (duration / 2) / 29.1;
+  distance = (duration * 0.034 / 2);
 
-  // Read temperature and humidity from DHT11 sensor
+  // Read temperature and humidity from DHT sensor
   float temperature = dht.readTemperature();
   float humidity = dht.readHumidity();
 
-  // Read ambient light from LDR
-  int ldrValue = analogRead(ldrPin);
+  // Read light intensity from LDR
+  int lightIntensity = analogRead(ldrPin);
 
-  // Display sensor data on LCD
+  // Display sensor readings on the LCD
+  lcd.clear();
   lcd.setCursor(0, 0);
-  lcd.print("Dist: ");
+  lcd.print("D: ");
   lcd.print(distance);
-  lcd.print(" cm");
+  lcd.print("cm");
+  lcd.print(" L: ");
+  lcd.print(lightIntensity);
+  
 
   lcd.setCursor(0, 1);
-  lcd.print("Temp: ");
+  lcd.print("T:");
   lcd.print(temperature);
-  lcd.print(" C");
-
-  lcd.setCursor(8, 0);
-  lcd.print("Hum: ");
+  lcd.print("C H:");
   lcd.print(humidity);
   lcd.print("%");
 
-  lcd.setCursor(8, 1);
-  lcd.print("Light: ");
-  lcd.print(ldrValue);
+  // Print sensor readings to serial monitor
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+  Serial.print("Temperature: ");
+  Serial.print(temperature);
+  Serial.print("°C  Humidity: ");
+  Serial.print(humidity);
+  Serial.println("%");
+  Serial.print("Light Intensity: ");
+  Serial.println(lightIntensity);
 
-  delay(500);
+  // Delay before next reading
+  delay(2000);
 }
