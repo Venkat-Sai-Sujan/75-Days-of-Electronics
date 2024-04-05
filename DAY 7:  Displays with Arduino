@@ -2,7 +2,6 @@
 #include <LiquidCrystal_I2C.h>
 #include <DHT.h>
 
-// Define the pins for the sensors
 const int trigPin = 12;
 const int echoPin = 13;
 const int dhtPin = 11;
@@ -10,13 +9,11 @@ const int ldrPin = A0;
 
 // Define the LCD parameters
 const int lcdAddress = 0x27; // LCD I2C address
-const int lcdCols = 16;      // Number of columns
-const int lcdRows = 2;       // Number of rows
+const int lcdCols = 16;      
+const int lcdRows = 2;      
 
-// Initialize the DHT sensor
 DHT dht(dhtPin, DHT11);
 
-// Create an instance of the LiquidCrystal_I2C class
 LiquidCrystal_I2C lcd(lcdAddress, lcdCols, lcdRows);
 
 void setup() {
